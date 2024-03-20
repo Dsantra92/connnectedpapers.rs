@@ -1,6 +1,5 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
-use serde_json::Value as JsonValue;
 
 type PaperID = String;
 
@@ -26,7 +25,7 @@ struct ExternalIDs {
     #[serde(rename = "ArXiv")]
     arxiv: Option<String>,
     #[serde(rename = "CorpusId")]
-    corpus_id: Option<JsonValue>,
+    corpus_id: Option<String>,
     #[serde(rename = "DBLP")]
     dblp: Option<String>,
     #[serde(rename = "DOI")]
@@ -42,24 +41,37 @@ struct ExternalIDs {
 #[derive(Serialize, Deserialize, Debug)]
 struct BasePaper {
     #[serde(rename = "abstract")]
-    _abstract: Option<String>,
+    abstract_text: Option<String>,
+    #[serde(rename = "arxivId")]
     arxiv_id: Option<String>,
     authors: Vec<PaperAuthor>,
-    corpusid: i32,
+    #[serde(rename = "corpusid")]
+    corpus_id: i32,
     doi: Option<String>,
+    #[serde(rename = "externalIds")]
     external_ids: ExternalIDs,
+    #[serde(rename = "fieldsOfStudy")]
     fields_of_study: Option<Vec<String>>,
     id: PaperID,
+    #[serde(rename = "isOpenAccess")]
     is_open_access: Option<bool>,
+    #[serde(rename = "journalName")]
     journal_name: Option<String>,
+    #[serde(rename = "journalPages")]
     journal_pages: Option<String>,
+    #[serde(rename = "journalVolume")]
     journal_volume: Option<String>,
+    #[serde(rename = "magId")]
     mag_id: Option<String>,
     number_of_authors: i32,
+    #[serde(rename = "paperId")]
     paper_id: PaperID,
+    #[serde(rename = "pdfUrls")]
     pdf_urls: Option<Vec<String>>,
     pmid: Option<String>,
+    #[serde(rename = "publicationDate")]
     publication_date: Option<String>,
+    #[serde(rename = "publicationTypes")]
     publication_types: Option<Vec<String>>,
     title: String,
     tldr: Option<String>,
@@ -67,6 +79,7 @@ struct BasePaper {
     venue: Option<String>,
     year: Option<i32>,
 }
+
 
 #[derive(Serialize, Deserialize, Debug)]
 struct CommonCitation {
