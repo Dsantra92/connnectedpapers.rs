@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 
-type PaperID = String;
+pub type PaperID = String;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct CommonAuthor {
@@ -113,7 +113,7 @@ struct Paper {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Graph {
+pub struct Graph {
     common_authors: Vec<CommonAuthor>,
     common_citations: Vec<CommonCitation>,
     common_references: Vec<CommonReference>,
