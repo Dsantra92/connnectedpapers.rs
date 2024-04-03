@@ -1,10 +1,10 @@
-use std::pin::Pin;
 use futures::stream;
 use futures::stream::{Stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::{json,Value};
+use serde_json::{json, Value};
 use std::env;
+use std::pin::Pin;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -87,84 +87,111 @@ impl ConnectedPapersClient {
         paper_id: String,
         initial_fresh_only: bool,
         loop_until_fresh: bool,
-    ) -> Pin<Box<dyn Stream<Item = Result<GraphResponse, Box<dyn std::error::Error + Send + Sync>>>>> {
-
+    ) -> Pin<Box<dyn Stream<Item = Result<GraphResponse, Box<dyn std::error::Error + Send + Sync>>>>>
+    {
         // TODO: Clean up the borrowing mess
-        let client  = self.client.clone();
+        let client = self.client.clone();
         let server_addr = self.server_addr.clone();
         let access_token = self.access_token.clone();
         let paper_id = paper_id.clone();
-        Box::pin(stream::unfold((1, None, None::<Box<dyn std::error::Error + Send + Sync>>, initial_fresh_only), move |(mut retry_counter, mut newest_graph, mut last_error, mut fresh_only)| {
-            let client = client.clone();
-            let paper_id_cloned = paper_id.clone();
-            let server_addr_cloned = server_addr.clone();
-            let access_token_cloned = access_token.clone();
+        Box::pin(stream::unfold(
+            (
+                1,
+                None,
+                None::<Box<dyn std::error::Error + Send + Sync>>,
+                initial_fresh_only,
+            ),
+            move |(mut retry_counter, mut newest_graph, mut last_error, mut fresh_only)| {
+                let client = client.clone();
+                let paper_id_cloned = paper_id.clone();
+                let server_addr_cloned = server_addr.clone();
+                let access_token_cloned = access_token.clone();
 
-            async move {
-                while retry_counter > 0 {
-                    let response = client
-                        .get(format!("{}/papers-api/graph/{}/{}", server_addr_cloned, fresh_only as i32, paper_id_cloned))
-                        .header("X-Api-Key", &access_token_cloned)
-                        .send()
-                        .await;
+                async move {
+                    while retry_counter > 0 {
+                        let response = client
+                            .get(format!(
+                                "{}/papers-api/graph/{}/{}",
+                                server_addr_cloned, fresh_only as i32, paper_id_cloned
+                            ))
+                            .header("X-Api-Key", &access_token_cloned)
+                            .send()
+                            .await;
 
-                    match response {
-                        Ok(resp) if resp.status() == 200 => {
-                            match resp.json::<Value>().await {
-                                Ok(mut body) => {
-                                    // Attempt to manually parse and modify the "status" field
-                                    let status = body.get("status")
-                                                        .and_then(|v| serde_json::from_value::<GraphResponseStatuses>(v.clone()).ok());
+                        match response {
+                            Ok(resp) if resp.status() == 200 => {
+                                match resp.json::<Value>().await {
+                                    Ok(mut body) => {
+                                        // Attempt to manually parse and modify the "status" field
+                                        let status = body.get("status").and_then(|v| {
+                                            serde_json::from_value::<GraphResponseStatuses>(
+                                                v.clone(),
+                                            )
+                                            .ok()
+                                        });
 
-                                    if status.is_none() { body["status"] = json!("ERROR"); }
-                                    fresh_only = true;
-                                    match serde_json::from_value::<GraphResponse>(body) {
-                                        Ok(mut data) => {
-                                            if data.graph_json.is_some() {
-                                                newest_graph = data.graph_json.clone();
-                                            }
-
-                                            if is_end_status(&data.status) || !loop_until_fresh {
-                                                // Successful or made a wrong request
-                                                return Some((Ok(data), (0, newest_graph, None, fresh_only)))
-                                            }
-                                            data.graph_json = newest_graph.clone();
-                                            return Some((Ok(data), (retry_counter, newest_graph, None, fresh_only)));
-
+                                        if status.is_none() {
+                                            body["status"] = json!("ERROR");
                                         }
-                                        Err(e) => last_error = Some(e.into())
-                                    }
-                                },
-                                Err(e) => last_error = Some(e.into())
-                            }
-                        },
-                        Ok(resp) => {
-                            // Handle non-200 status codes without stopping the entire process
-                            let error_message = format!("Bad response: {}", resp.status());
-                            last_error = Some(Box::new(std::io::Error::new(std::io::ErrorKind::Other, error_message)));
-                        },
-                        Err(e) => last_error = Some(e.into()),
-                    }
-                    if last_error.is_some() {
-                        retry_counter -= 1;
+                                        fresh_only = true;
+                                        match serde_json::from_value::<GraphResponse>(body) {
+                                            Ok(mut data) => {
+                                                if data.graph_json.is_some() {
+                                                    newest_graph = data.graph_json.clone();
+                                                }
 
-                        if retry_counter > 0 {
-                            sleep(Duration::from_millis(SLEEP_TIME_AFTER_ERROR)).await; // Sleep after an error before retrying
+                                                if is_end_status(&data.status) || !loop_until_fresh
+                                                {
+                                                    // Successful or made a wrong request
+                                                    return Some((
+                                                        Ok(data),
+                                                        (0, newest_graph, None, fresh_only),
+                                                    ));
+                                                }
+                                                data.graph_json = newest_graph.clone();
+                                                return Some((
+                                                    Ok(data),
+                                                    (retry_counter, newest_graph, None, fresh_only),
+                                                ));
+                                            }
+                                            Err(e) => last_error = Some(e.into()),
+                                        }
+                                    }
+                                    Err(e) => last_error = Some(e.into()),
+                                }
+                            }
+                            Ok(resp) => {
+                                // Handle non-200 status codes without stopping the entire process
+                                let error_message = format!("Bad response: {}", resp.status());
+                                last_error = Some(Box::new(std::io::Error::new(
+                                    std::io::ErrorKind::Other,
+                                    error_message,
+                                )));
+                            }
+                            Err(e) => last_error = Some(e.into()),
+                        }
+                        if last_error.is_some() {
+                            retry_counter -= 1;
+
+                            if retry_counter > 0 {
+                                sleep(Duration::from_millis(SLEEP_TIME_AFTER_ERROR)).await;
+                                // Sleep after an error before retrying
+                            }
+                        } else {
+                            sleep(Duration::from_millis(SLEEP_TIME_BETWEEN_CHECKS)).await;
+                            // Sleep after an error before retrying
                         }
                     }
-                    else{
-                        sleep(Duration::from_millis(SLEEP_TIME_BETWEEN_CHECKS)).await; // Sleep after an error before retrying
+
+                    if let Some(error) = last_error {
+                        // Return the last error if all retries have been exhausted
+                        Some((Err(error), (0, newest_graph, None, true)))
+                    } else {
+                        None // End of stream if no data could be fetched and retries are exhausted
                     }
                 }
-
-                if let Some(error) = last_error {
-                    // Return the last error if all retries have been exhausted
-                    Some((Err(error), (0, newest_graph, None, true)))
-                } else {
-                    None // End of stream if no data could be fetched and retries are exhausted
-                }
-            }
-        }))
+            },
+        ))
     }
 
     pub async fn get_graph(
@@ -185,7 +212,7 @@ impl ConnectedPapersClient {
             match response {
                 Ok(data) => {
                     result = data;
-                },
+                }
                 Err(e) => return Err(e),
             }
         }

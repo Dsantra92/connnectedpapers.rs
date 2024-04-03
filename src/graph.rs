@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub type PaperID = String;
@@ -80,7 +80,6 @@ pub struct BasePaper {
     pub year: Option<i32>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommonCitation {
     #[serde(flatten)]
@@ -109,7 +108,7 @@ pub struct Paper {
     pub base_paper: BasePaper,
     pub path: Vec<PaperID>,
     pub path_length: f32,
-    pub pos: (f32, f32)
+    pub pos: (f32, f32),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
