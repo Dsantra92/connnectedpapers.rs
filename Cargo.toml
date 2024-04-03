@@ -1,14 +1,14 @@
 [package]
 name = "connectedpapers"
+authors = ["Deeptendu Santra <deeptendu.santra@pm.me>"]
 version = "0.1.0"
 edition = "2021"
 description = "Unoffical client for connectedpapers API"
 license = "MIT"
 homepage = "https://github.com/Dsantra92/connnectedpapers.rs"
+keywords = ["connnectedpapers"]
 repository = "https://github.com/Dsantra92/connnectedpapers.rs"
 readme = "README.md"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 serde = {version = "1", features = ["derive"]}
@@ -16,3 +16,6 @@ serde_json = "1"
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
+
+[[example]]
+name = "usage"

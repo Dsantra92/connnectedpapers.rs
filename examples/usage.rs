@@ -1,6 +1,5 @@
 use connectedpapers::ConnectedPapersClient;
 use tokio;
-use dotenv::dotenv;
 
 const DEEPFRUITS_PAPER_ID: &str = "9397e7acd062245d37350f5c05faf56e9cfae0d6";
 
