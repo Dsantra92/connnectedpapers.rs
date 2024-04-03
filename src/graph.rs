@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 pub type PaperID = String;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct CommonAuthor {
     id: String,
     mention_indexes: Vec<i32>,
@@ -12,13 +12,13 @@ struct CommonAuthor {
     url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct PaperAuthor {
     ids: Vec<Option<String>>,
     name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct ExternalIDs {
     #[serde(rename = "ACL")]
     acl: Option<String>,
@@ -38,7 +38,7 @@ struct ExternalIDs {
     pub_med_central: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct BasePaper {
     #[serde(rename = "abstract")]
     abstract_text: Option<String>,
@@ -81,7 +81,7 @@ struct BasePaper {
 }
 
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct CommonCitation {
     #[serde(flatten)]
     base_paper: BasePaper,
@@ -91,7 +91,7 @@ struct CommonCitation {
     pi_name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct CommonReference {
     #[serde(flatten)]
     base_paper: BasePaper,
@@ -103,7 +103,7 @@ struct CommonReference {
 
 type Edge = (PaperID, PaperID, f32);
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct Paper {
     #[serde(flatten)]
     base_paper: BasePaper,
@@ -112,7 +112,7 @@ struct Paper {
     pos: (f32, f32)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Graph {
     common_authors: Vec<CommonAuthor>,
     common_citations: Vec<CommonCitation>,
