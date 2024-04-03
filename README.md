@@ -1,6 +1,6 @@
 # ConnectedPapers.rs
 
-An unofficial rust API for [ConnectedPapers](https://www.connectedpapers.com/). Inspired from the [TS client].
+An unofficial rust API for [ConnectedPapers](https://www.connectedpapers.com/). Inspired from the [JS client](https://github.com/ConnectedPapers/connectedpapers-js).
 
 You can find relevant examples [here](usage/example.rs).
 
