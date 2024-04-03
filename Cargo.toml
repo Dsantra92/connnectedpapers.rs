@@ -2,6 +2,11 @@
 name = "connectedpapers"
 version = "0.1.0"
 edition = "2021"
+description = "Unoffical client for connectedpapers API"
+license = "MIT"
+homepage = "https://github.com/Dsantra92/connnectedpapers.rs"
+repository = "https://github.com/Dsantra92/connnectedpapers.rs"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
