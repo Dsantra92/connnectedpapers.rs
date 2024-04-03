@@ -9,6 +9,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 mod graph;
+
 use graph::{Graph, PaperID};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -28,9 +29,9 @@ pub enum GraphResponseStatuses {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GraphResponse {
-    status: GraphResponseStatuses,
-    graph_json: Option<Graph>,
-    progress: Option<f64>,
+    pub status: GraphResponseStatuses,
+    pub graph_json: Option<Graph>,
+    pub progress: Option<f64>,
 }
 
 static SLEEP_TIME_BETWEEN_CHECKS: u64 = 1000;
@@ -86,11 +87,14 @@ impl ConnectedPapersClient {
         paper_id: String,
         initial_fresh_only: bool,
         loop_until_fresh: bool,
-        server_addr: String,
-        access_token: String,
     ) -> Pin<Box<dyn Stream<Item = Result<GraphResponse, Box<dyn std::error::Error + Send + Sync>>>>> {
+
+        // TODO: Clean up the borrowing mess
         let client  = self.client.clone();
-        Box::pin(stream::unfold((3, None, None::<Box<dyn std::error::Error + Send + Sync>>, initial_fresh_only), move |(mut retry_counter, mut newest_graph, mut last_error, mut fresh_only)| {
+        let server_addr = self.server_addr.clone();
+        let access_token = self.access_token.clone();
+        let paper_id = paper_id.clone();
+        Box::pin(stream::unfold((1, None, None::<Box<dyn std::error::Error + Send + Sync>>, initial_fresh_only), move |(mut retry_counter, mut newest_graph, mut last_error, mut fresh_only)| {
             let client = client.clone();
             let paper_id_cloned = paper_id.clone();
             let server_addr_cloned = server_addr.clone();
@@ -121,10 +125,11 @@ impl ConnectedPapersClient {
                                             }
 
                                             if is_end_status(&data.status) || !loop_until_fresh {
-                                                return Some((Ok(data), (0, newest_graph, None, fresh_only)));
+                                                // Successful or made a wrong request
+                                                return Some((Ok(data), (0, newest_graph, None, fresh_only)))
                                             }
                                             data.graph_json = newest_graph.clone();
-                                            return Some((Ok(data), (0, newest_graph, None, fresh_only)));
+                                            return Some((Ok(data), (retry_counter, newest_graph, None, fresh_only)));
 
                                         }
                                         Err(e) => last_error = Some(e.into())
@@ -166,8 +171,6 @@ impl ConnectedPapersClient {
         &self,
         paper_id: String,
         fresh_only: bool,
-        server_addr: String,
-        access_token: String,
     ) -> Result<GraphResponse, Box<dyn std::error::Error + Send + Sync>> {
         let mut result = GraphResponse {
             status: GraphResponseStatuses::Error,
@@ -175,16 +178,17 @@ impl ConnectedPapersClient {
             progress: None,
         };
 
-        let mut stream = self.get_graph_async_iterator(paper_id, fresh_only, false, server_addr, access_token);
+        let mut stream = self.get_graph_async_iterator(paper_id, fresh_only, true);
 
         // Consume the stream until completion, updating `result` with each received item
         while let Some(response) = stream.next().await {
             match response {
-                Ok(data) => result = data,
+                Ok(data) => {
+                    result = data;
+                },
                 Err(e) => return Err(e),
             }
         }
-
         Ok(result)
     }
 

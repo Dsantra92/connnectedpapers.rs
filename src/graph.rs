@@ -4,121 +4,121 @@ use std::collections::HashMap;
 pub type PaperID = String;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CommonAuthor {
-    id: String,
-    mention_indexes: Vec<i32>,
-    mentions: Vec<PaperID>,
-    name: String,
-    url: String,
+pub struct CommonAuthor {
+    pub id: String,
+    pub mention_indexes: Vec<i32>,
+    pub mentions: Vec<PaperID>,
+    pub name: String,
+    pub url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct PaperAuthor {
-    ids: Vec<Option<String>>,
-    name: String,
+pub struct PaperAuthor {
+    pub ids: Vec<Option<String>>,
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct ExternalIDs {
+pub struct ExternalIDs {
     #[serde(rename = "ACL")]
-    acl: Option<String>,
+    pub acl: Option<String>,
     #[serde(rename = "ArXiv")]
-    arxiv: Option<String>,
+    pub arxiv: Option<String>,
     #[serde(rename = "CorpusId")]
-    corpus_id: Option<String>,
+    pub corpus_id: Option<u64>,
     #[serde(rename = "DBLP")]
-    dblp: Option<String>,
+    pub dblp: Option<String>,
     #[serde(rename = "DOI")]
-    doi: Option<String>,
+    pub doi: Option<String>,
     #[serde(rename = "MAG")]
-    mag: Option<String>,
+    pub mag: Option<String>,
     #[serde(rename = "PubMed")]
-    pub_med: Option<String>,
+    pub pub_med: Option<String>,
     #[serde(rename = "PubMedCentral")]
-    pub_med_central: Option<String>,
+    pub pub_med_central: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct BasePaper {
+pub struct BasePaper {
     #[serde(rename = "abstract")]
-    abstract_text: Option<String>,
+    pub abstract_text: Option<String>,
     #[serde(rename = "arxivId")]
-    arxiv_id: Option<String>,
-    authors: Vec<PaperAuthor>,
+    pub arxiv_id: Option<String>,
+    pub authors: Vec<PaperAuthor>,
     #[serde(rename = "corpusid")]
-    corpus_id: i32,
-    doi: Option<String>,
+    pub corpus_id: i32,
+    pub doi: Option<String>,
     #[serde(rename = "externalIds")]
-    external_ids: ExternalIDs,
+    pub external_ids: ExternalIDs,
     #[serde(rename = "fieldsOfStudy")]
-    fields_of_study: Option<Vec<String>>,
-    id: PaperID,
+    pub fields_of_study: Option<Vec<String>>,
+    pub id: PaperID,
     #[serde(rename = "isOpenAccess")]
-    is_open_access: Option<bool>,
+    pub is_open_access: Option<bool>,
     #[serde(rename = "journalName")]
-    journal_name: Option<String>,
+    pub journal_name: Option<String>,
     #[serde(rename = "journalPages")]
-    journal_pages: Option<String>,
+    pub journal_pages: Option<String>,
     #[serde(rename = "journalVolume")]
-    journal_volume: Option<String>,
+    pub journal_volume: Option<String>,
     #[serde(rename = "magId")]
-    mag_id: Option<String>,
-    number_of_authors: i32,
+    pub mag_id: Option<String>,
+    pub number_of_authors: i32,
     #[serde(rename = "paperId")]
-    paper_id: PaperID,
+    pub paper_id: PaperID,
     #[serde(rename = "pdfUrls")]
-    pdf_urls: Option<Vec<String>>,
-    pmid: Option<String>,
+    pub pdf_urls: Option<Vec<String>>,
+    pub pmid: Option<String>,
     #[serde(rename = "publicationDate")]
-    publication_date: Option<String>,
+    pub publication_date: Option<String>,
     #[serde(rename = "publicationTypes")]
-    publication_types: Option<Vec<String>>,
-    title: String,
-    tldr: Option<String>,
-    url: String,
-    venue: Option<String>,
-    year: Option<i32>,
+    pub publication_types: Option<Vec<String>>,
+    pub title: String,
+    pub tldr: Option<String>,
+    pub url: String,
+    pub venue: Option<String>,
+    pub year: Option<i32>,
 }
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CommonCitation {
+pub struct CommonCitation {
     #[serde(flatten)]
-    base_paper: BasePaper,
-    edges_count: i32,
-    local_references: Vec<PaperID>,
-    paper_id: PaperID,
-    pi_name: Option<String>,
+    pub base_paper: BasePaper,
+    pub edges_count: i32,
+    pub local_references: Vec<PaperID>,
+    pub paper_id: PaperID,
+    pub pi_name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct CommonReference {
+pub struct CommonReference {
     #[serde(flatten)]
-    base_paper: BasePaper,
-    edges_count: i32,
-    local_citations: Vec<PaperID>,
-    paper_id: PaperID,
-    pi_name: Option<String>,
+    pub base_paper: BasePaper,
+    pub edges_count: i32,
+    pub local_citations: Vec<PaperID>,
+    pub paper_id: PaperID,
+    pub pi_name: Option<String>,
 }
 
-type Edge = (PaperID, PaperID, f32);
+pub type Edge = (PaperID, PaperID, f32);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct Paper {
+pub struct Paper {
     #[serde(flatten)]
-    base_paper: BasePaper,
-    path: Vec<PaperID>,
-    path_length: f32,
-    pos: (f32, f32)
+    pub base_paper: BasePaper,
+    pub path: Vec<PaperID>,
+    pub path_length: f32,
+    pub pos: (f32, f32)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Graph {
-    common_authors: Vec<CommonAuthor>,
-    common_citations: Vec<CommonCitation>,
-    common_references: Vec<CommonReference>,
-    edges: Vec<Edge>,
-    nodes: HashMap<PaperID, Paper>,
-    path_lengths: HashMap<PaperID, f32>,
-    start_id: PaperID,
+    pub common_authors: Vec<CommonAuthor>,
+    pub common_citations: Vec<CommonCitation>,
+    pub common_references: Vec<CommonReference>,
+    pub edges: Vec<Edge>,
+    pub nodes: HashMap<PaperID, Paper>,
+    pub path_lengths: HashMap<PaperID, f32>,
+    pub start_id: PaperID,
 }
